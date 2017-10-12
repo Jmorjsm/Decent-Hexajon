@@ -2,6 +2,7 @@ class Obstacle {
   int lane;
   float distance;
   float rotation;
+  float laneAngle;
   float size = 20;
   PVector center;
 
@@ -12,13 +13,22 @@ class Obstacle {
   float x1, x2, x3, x4;
   float y1, y2, y3, y4;
   float start,end;
-  Obstacle(int l, float currentRotation) {
+  Obstacle(int laneNo, float currentRotation) {
     speed = 3;
-    lane = l;
+    lane = laneNo;
     rotation = currentRotation;
     center = new PVector(width/2, height/2);
     
-    distance = random(800,3000);
+    distance = random(800,1500);
+  }
+  Obstacle(int laneNo, float currentRotation, float dist,float laneAng) {
+    speed = 3;
+    lane = laneNo;
+    laneAngle = laneAng;
+    rotation = currentRotation;
+    center = new PVector(width/2, height/2);
+    
+    distance = dist;
   }
 
   void wallQuad() {

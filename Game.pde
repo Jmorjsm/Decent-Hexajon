@@ -1,4 +1,4 @@
-import java.util.Iterator;
+import java.util.Iterator; //<>// //<>//
 class Game {
   Player player;
   int laneCount;
@@ -9,14 +9,27 @@ class Game {
   float startTime;
   float timePlaying;
   int direction = 1;
+  PShape hexagon;
+  String timeString;
+  float timeInSeconds;
+  float timerTextWidth;
+  float gameRotationSpeed;
+  float playerRotationSpeed;
   Game() {
-    player = new Player();
+    player = new Player(1,1);
     laneCount = 6;
     obstacles = new ArrayList<Obstacle>();
     //obstacles.add(new Obstacle(2, 0));
     center = new PVector(width/2, height/2);
     playing = true;
     startTime = millis();
+    hexagon = createHexagon();
+    gameRotationSpeed = 0.03;
+    playerRotationSpeed = gameRotationSpeed*1.75;
+    textSize(30); 
+    textAlign(LEFT, TOP);
+    textFont(createFont("Arial Black", 30));
+    timerTextWidth = textWidth(nf(100.999, 2, 2));
   }
 
   PShape createHexagon() {
@@ -40,15 +53,14 @@ class Game {
     // Handle user input
     if (keyPressed) {
       if (keyCode == LEFT || key == 'a') {
-        player.move(0.05);
+        player.move(playerRotationSpeed);
       } else if (keyCode == RIGHT || key == 'd') {
-        player.move(-0.05);
+        player.move(-playerRotationSpeed);
       }
     }
 
     noStroke();
     for (int i=1; i<7; i++) {
-      //shape(createLane(i), width/2, height/2);
       if (i%2==0) {
         fill(40, 40, 80);
       } else {
@@ -59,49 +71,51 @@ class Game {
     stroke(255);
     shape(createHexagon(), width/2, height/2);
     player.draw();
-    float newRotation = rotation+0.01*direction;
+    
+    float newRotation = rotation+gameRotationSpeed*direction;
+    
     if (newRotation > TAU) {
-      rotation = rotation+0.01-TAU;
-    } else if(newRotation<0) {
-      rotation = TAU-(rotation-0.01);
-    }else{
+      rotation = rotation+gameRotationSpeed-TAU;
+    } else if (newRotation<0) {
+      rotation = TAU-(rotation-gameRotationSpeed);
+    } else {
       rotation = newRotation;
     }
-    player.rotate(-0.01*direction);
+    player.rotate(-gameRotationSpeed*direction);
     if (obstacles.size()<10) {
+      //Pattern p = new Pattern();
+      //obstacles.addAll(p.generateObstacles(rotation));
       obstacles.add(new Obstacle(round(random(6)), rotation));
       //obstacles.add(new Obstacle(2, rotation));
     }
-
-    for (Iterator<Obstacle> iterator = obstacles.iterator(); iterator.hasNext(); ) {
-      Obstacle ob = iterator.next();
-      if (ob.distance >= player.radius-ob.size && ob.distance <= player.radius+player.size && player.lane%6 == ob.lane-1) {
+    
+    for (int i=obstacles.size()-1; i>=0; i--) {
+      Obstacle ob = obstacles.get(i);
+      if (ob.distance >= player.radius-ob.size && ob.distance <= player.radius+player.size && player.lane%laneCount == ob.lane-1) {
         playing = false;
       } else {
         if (ob.distance > 4) {
           ob.draw();
-          ob.update(0.01*direction);
+          ob.update(gameRotationSpeed*direction);
         } else {
-          iterator.remove();
+          obstacles.remove(i);
         }
       }
     }
-    
-    
+
+
     drawTimer();
-   
-    if(frameCount%400==0 && random(2)<1){
+
+    if (frameCount%400==0 && random(2)<1) {
       direction = -direction;
     }
   }
   void drawTimer() {
     timePlaying = millis()-startTime;
-    float timeInSeconds = timePlaying/1000;
-    String timeString = nf(timeInSeconds,2,2);
+    timeInSeconds = timePlaying/1000;
+    timeString = nf(timeInSeconds, 2, 2);
 
-    textSize(30); 
-    textAlign(LEFT,TOP);
-    textFont(createFont("Arial Black",30));
-    text(timeString, width-(textWidth(timeString)+5), 5);
+
+    text(timeString, width-(timerTextWidth+5), 5);
   }
 }

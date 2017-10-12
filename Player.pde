@@ -6,7 +6,11 @@ class Player {
   PVector position;
   PVector centerPoint;
   float gameRotation;
-  Player(){
+  int laneCount;
+  float laneAngle=1;
+  Player(float laneAng, int laneC){
+    laneCount = laneC;
+    laneAngle = laneAng;
     size = 5;
     rotation = 0;
     radius = 35;
