@@ -1,41 +1,35 @@
 class Obstacle {
   int lane;
+
   float distance;
   float rotation;
   float laneAngle;
-  float size = 20;
-  PVector center;
-
   float cosVal1, cosVal2;
   float sinVal1, sinVal2;
-
   float speed;
   float x1, x2, x3, x4;
   float y1, y2, y3, y4;
   float start,end;
-  Obstacle(int laneNo, float currentRotation) {
-    speed = 3;
-    lane = laneNo;
-    rotation = currentRotation;
-    center = new PVector(width/2, height/2);
-    
-    distance = random(800,1500);
-  }
-  Obstacle(int laneNo, float currentRotation, float dist,float laneAng) {
-    speed = 3;
+  float size = 20;
+
+  PVector center;
+
+  Obstacle(int laneNo, float currentRotation,float laneAng, float difficulty) {
+    speed = 3*difficulty;
     lane = laneNo;
     laneAngle = laneAng;
     rotation = currentRotation;
-    center = new PVector(width/2, height/2);
+
+    center = new PVector(width/2, height/2); // set center to middle of screen.
     
-    distance = dist;
+    distance = random(800,1500); // set random distance from center
   }
 
   void wallQuad() {
 
     fill(180, 180, 200);
-    start = rotation + (lane * THIRD_PI);
-    end = rotation + ((lane+1) * THIRD_PI);
+    start = rotation + (lane * laneAngle);
+    end = rotation + ((lane+1) * laneAngle);
     cosVal1 = cos(start);
     cosVal2 = cos(end);
     sinVal1 = sin(start);
@@ -56,11 +50,8 @@ class Obstacle {
     quad(x1, y1, x2, y2, x3, y3, x4, y4);
   }
   void update(float r) {
-    if(rotation+r > TAU){
-      rotation = rotation+r-TAU;
-    }else{
-      rotation += r;
-    }
+    rotation += r;
+    
     distance -= speed;
   }
   void draw() {

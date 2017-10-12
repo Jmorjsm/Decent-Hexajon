@@ -8,6 +8,7 @@ class Player {
   float gameRotation;
   int laneCount;
   float laneAngle=1;
+
   Player(float laneAng, int laneC){
     laneCount = laneC;
     laneAngle = laneAng;
@@ -19,13 +20,16 @@ class Player {
     updatePosition();
     lane = 0;
   }
+  
   void updatePosition(){
     position.x = centerPoint.x + sin(rotation)*radius;
     position.y = centerPoint.y + cos(rotation)*radius;
-    lane = -(round((rotation-gameRotation)/(THIRD_PI))%6);
-    if(lane<0){ lane = 6+lane;}
-    //println(lane);
+    lane = -(round((rotation-gameRotation)/(laneAngle))%laneCount);
+    if(lane<0){ 
+      lane = laneCount+lane;
+    }
   }
+
   void move(float direction){
     if(rotation+direction > TAU){
       rotation = rotation+direction-TAU;
@@ -34,6 +38,7 @@ class Player {
     }
     updatePosition();
   }
+
   void rotate(float direction){
     gameRotation +=direction;
     if(rotation+direction > TAU){

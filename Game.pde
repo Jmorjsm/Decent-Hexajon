@@ -1,30 +1,47 @@
-import java.util.Iterator; //<>// //<>//
 class Game {
-  Player player;
-  int laneCount;
-  float rotation;
-  ArrayList<Obstacle> obstacles;
-  PVector center;
   boolean playing;
+  boolean colorFlip;
+  int laneCount;
+  int direction = 1;
+
+  float difficulty;
   float startTime;
   float timePlaying;
-  int direction = 1;
-  PShape hexagon;
-  String timeString;
   float timeInSeconds;
   float timerTextWidth;
   float gameRotationSpeed;
   float playerRotationSpeed;
-  Game() {
-    player = new Player(1,1);
+  float laneAngle;
+  float rotation;
+  
+  color c1, c2;
+
+  String timeString;
+  
+  PVector center;
+  PShape hexagon;
+  
+  Player player;
+  ArrayList<Obstacle> obstacles;
+
+  Game(int diff, color[] colors) {
+    keyPressed = false;
+    colorFlip = false;
+    difficulty = diff/2f;
+    
+    c1 = colors[0];
+    c2 = colors[1];
+
     laneCount = 6;
+    laneAngle = TAU/laneCount;
+    player = new Player(laneAngle, laneCount);
     obstacles = new ArrayList<Obstacle>();
-    //obstacles.add(new Obstacle(2, 0));
+    
     center = new PVector(width/2, height/2);
     playing = true;
     startTime = millis();
     hexagon = createHexagon();
-    gameRotationSpeed = 0.03;
+    gameRotationSpeed = 0.02*difficulty;
     playerRotationSpeed = gameRotationSpeed*1.75;
     textSize(30); 
     textAlign(LEFT, TOP);
@@ -37,14 +54,14 @@ class Game {
     hexagon.beginShape();
     hexagon.noFill();
     hexagon.strokeWeight(4);
-    for ( int i = 0; i < 6; i++ ) {
-      float x = cos( rotation + (i * THIRD_PI) ) * 20;
-      float y = sin( rotation + (i * THIRD_PI) ) * 20;
+    for ( int i = 0; i < laneCount; i++ ) {
+      float x = cos( rotation + (i * laneAngle) ) * 20;
+      float y = sin( rotation + (i * laneAngle) ) * 20;
       hexagon.vertex( x, y );
     }
     hexagon.endShape( CLOSE );
 
-    //hexagon.setFill( color( 255, 64 ) )
+    
     hexagon.setStroke( color(255));
     return hexagon;
   }
@@ -59,35 +76,38 @@ class Game {
       }
     }
 
-    noStroke();
-    for (int i=1; i<7; i++) {
-      if (i%2==0) {
-        fill(40, 40, 80);
-      } else {
-        fill(60, 60, 140);
-      }
-      triangle(center.x+cos(rotation + (i * THIRD_PI)) * 900, center.y+sin(rotation+((i) * THIRD_PI)) * 900, center.x+cos(rotation + ((i+1) * THIRD_PI)) * 900, center.y+sin(rotation+((i+1) * THIRD_PI)) * 900, width/2, height/2);
+    float newRotation = rotation+gameRotationSpeed*direction;
+    rotation = newRotation;
+  
+    player.rotate(-gameRotationSpeed*direction);
+    
+    if (obstacles.size()<7.5*difficulty) {
+      obstacles.add(new Obstacle(round(random(laneCount)), rotation, laneAngle, difficulty));
     }
+
+    noStroke();
+    for (int i=0; i<laneCount; i++) {
+      if(colorFlip){
+        if (i%2==0) {
+          fill(c1);
+        } else {
+          fill(c2);
+        }
+      } else {
+        if (i%2==0) {
+          fill(c2);
+        } else {
+          fill(c1);
+        }
+      }
+      triangle(width/2, height/2, center.x+cos(rotation + (i * laneAngle)) * 900, center.y+sin(rotation+((i) * laneAngle)) * 900, center.x+cos(rotation + ((i+1) * laneAngle)) * 900, center.y+sin(rotation+((i+1) * laneAngle)) * 900);
+    }
+    
     stroke(255);
     shape(createHexagon(), width/2, height/2);
+    
     player.draw();
     
-    float newRotation = rotation+gameRotationSpeed*direction;
-    
-    if (newRotation > TAU) {
-      rotation = rotation+gameRotationSpeed-TAU;
-    } else if (newRotation<0) {
-      rotation = TAU-(rotation-gameRotationSpeed);
-    } else {
-      rotation = newRotation;
-    }
-    player.rotate(-gameRotationSpeed*direction);
-    if (obstacles.size()<10) {
-      //Pattern p = new Pattern();
-      //obstacles.addAll(p.generateObstacles(rotation));
-      obstacles.add(new Obstacle(round(random(6)), rotation));
-      //obstacles.add(new Obstacle(2, rotation));
-    }
     
     for (int i=obstacles.size()-1; i>=0; i--) {
       Obstacle ob = obstacles.get(i);
@@ -95,19 +115,26 @@ class Game {
         playing = false;
       } else {
         if (ob.distance > 4) {
-          ob.draw();
+
           ob.update(gameRotationSpeed*direction);
+          ob.draw();
         } else {
           obstacles.remove(i);
         }
       }
     }
 
-
     drawTimer();
 
-    if (frameCount%400==0 && random(2)<1) {
-      direction = -direction;
+    if(frameCount%100==0 && random(2)<1){
+      colorFlip = !colorFlip;
+    }
+
+    if (frameCount%400==0){
+      if(random(2)<1) {
+        direction = -direction;
+      }
+      gameRotationSpeed+=0.001;
     }
   }
   void drawTimer() {
