@@ -18,6 +18,7 @@ color[][] difficultyColor = new color[][]{
 
 void setup() {
   size(1280, 720, P2D); // make sure using P2D renderer as it is fastest
+  //size(1024, 500, P2D); // make sure using P2D renderer as it is fastest
   frameRate(120); // use a higher framerate as very fast paced
   nickname = "";
   inMenu = true; // start in menu
