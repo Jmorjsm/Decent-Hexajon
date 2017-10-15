@@ -124,7 +124,9 @@ void keyPressed(){
         }
         output.close();
         nickname = "";
-      }
+      } 
+      key=0;
+      keyCode=0;
       game = new Game(difficulty, difficultyColor[difficulty-1]);
       
     }else{
